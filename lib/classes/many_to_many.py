@@ -10,16 +10,13 @@ class Article:
     def name(self):
         return self._title
     @name.setter
-    def name(self, name):
-        if isinstance(name, str):
-            self._title= name
-        else: raise Exception("Name must be a string.") 
-        if not 5<=len(name)<=50:
-            raise Exception("Titles must be between 5 and 50 characters, inclusive")
-        else:
-            self._title
-        if hasattr(self, '_name'):
-            self._title = name
+    def name(self, title):
+        if not isinstance(title, str):
+            raise Exception("Title must be a string.")
+        if not 5<=len(title) <= 50:
+            raise Exception("Title must be between 5 and 50 characters.")
+        if hasattr(self, '_title'):
+            self._title = title
         else: 
             raise Exception("Should not be able to change after the article is instantiated")      
 #    object relationship methods
@@ -73,8 +70,9 @@ class Author:
         return Article( self, magazine, title)
    
     def topic_areas(self):
-        pass
-
+        categories = [Magazine.category for Magazine in self.magazines() if isinstance(Magazine.category, str)]
+        return list(set(categories)) if categories else None
+    
 class Magazine:
     list_of_titles= []
 
@@ -106,7 +104,7 @@ class Magazine:
             self._category= name
         else: raise Exception("Categories must be of type str")
         if (len(name)>0):
-            self._category
+            self._category= name
         else:    
             raise Exception("Categories must be longer than 0 characters")
 # Object Relationship Methods and Properties
@@ -117,7 +115,13 @@ class Magazine:
         return list(set(article.author for article in self.article() if article.author ==self))
 # Aggregate and Association Methods
     def article_titles(self):
-        pass
+        titles = [article.title for article in self.articles()]
+        return titles if titles else None
 
     def contributing_authors(self):
-        pass
+        from collections import Counter
+        author_counts = Counter(article.author for article in self.articles())
+        contributors = [author for author,
+                        count in author_counts.items() if count > 2]
+        return contributors if contributors else None
+       
